@@ -31,7 +31,14 @@ class SAPManipulation():
     def using_active_conection(self) -> bool:
         return self.__using_active_conection
     
-    def __init__(self, *, user:str="", password:str="", ambiente:str="", using_active_conection:bool=False) -> None:
+    def __init__(self, *, user:str|None="", password:str|None="", ambiente:str|None="", using_active_conection:bool=False) -> None:
+        if not ((user) and (password) and (ambiente)):
+            raise Exception(f"""é necessario preencher todos os campos \n
+                            {user=}\n
+                            {password=} \n 
+                            {ambiente=} \n                            
+                            """)
+        
         self.__using_active_conection = using_active_conection
         self.__user:str = user
         self.__password:str = password

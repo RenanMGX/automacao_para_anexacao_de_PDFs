@@ -1,6 +1,7 @@
 import configparser
 import os
 from typing import Literal, Dict
+import sys
 
 try:
     from Entities.dependencies.default_config import default as default_config
@@ -29,7 +30,9 @@ class Config:
                     if options:
                         for option, value in options.items():
                             self.config[str(key)][option] = str(value)
-            self.__save()                    
+            self.__save()
+            print(f"o arquivo '{self.file_name}' não existia então foi criado e o script sera encerrado!")
+            sys.exit()
         else:
             self.__config = configparser.ConfigParser()
             self.read()
