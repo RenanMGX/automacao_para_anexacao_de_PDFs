@@ -1,4 +1,5 @@
 from Entities.dependencies.logs import Logs
+from Entities.dependencies.functions import P
 from getpass import getuser
 import win32com.client
 from datetime import datetime
@@ -82,6 +83,11 @@ class SAPManipulation():
                 self.session.findById("wnd[0]/usr/pwdRSYST-BCODE").text = self.__password # Senha
                 self.session.findById("wnd[0]").sendVKey(0)
                 
+                try:
+                    if (sbar:=self.session.findById("wnd[0]/sbar").text):
+                        print(sbar)
+                except:
+                    pass
                 return 
             except Exception as error:
                 if "connection = application.OpenConnection(self.__ambiente, True)" in traceback.format_exc():

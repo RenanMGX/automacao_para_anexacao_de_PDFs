@@ -83,14 +83,15 @@ class P:
         else:
             return Fore.RESET
     
-    def __init__(self, value: object, *, color:Literal['white', 'red', 'blue', 'green', 'cyan', 'yellow', 'magenta', 'nenhum'] = "nenhum") -> None:
+    def __init__(self, value: object, *, color:Literal['white', 'red', 'blue', 'green', 'cyan', 'yellow', 'magenta', 'nenhum'] = "nenhum", title:Literal["", "REPORT", "ERROR", "COMPLETED"]="") -> None:
         if not isinstance(value, str):
             value = str(value)
         self.__value:str = value
         self.__color:str = color
+        self.__title:str = title
         
     def __str__(self) -> str:
-        return f"{self.date}{self.color + self.__value + Fore.RESET}"
+        return f"{self.date}{(f"{self.__title} - " if self.__title else "- ")}{self.color + self.__value + Fore.RESET}"
 
  
 if __name__ == "__main__":

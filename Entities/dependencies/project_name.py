@@ -1,1 +1,1 @@
-PROJECT_NAME:str = "Partes Relacionadas"
+PROJECT_NAME:str = "Automação para anexação de PDFs em documentos contábeis no SAP"
