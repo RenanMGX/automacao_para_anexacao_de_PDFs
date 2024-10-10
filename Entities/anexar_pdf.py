@@ -95,10 +95,10 @@ class AnexarPDF(SAPManipulation):
                         shutil.move(msg.group(), self.download_path)
                     else:
                         print(f"não foi possivel baixar o pdf - {msg}")
-                        Logs().register(status='Error', description="erro ao fazer download do pdf", exception=msg)
+                        Logs().register(status='Report', description="erro ao fazer download do pdf", exception=msg)
                 else:
                     print(f"não foi possivel baixar o pd - {tbar}")
-                    Logs().register(status='Error', description="erro ao fazer download do pdf", exception=tbar)
+                    Logs().register(status='Report', description="erro ao fazer download do pdf", exception=tbar)
                         
             except Exception as error:
                 break
@@ -116,7 +116,7 @@ class AnexarPDF(SAPManipulation):
     def anexar_pdf_miro(self, *, chave_acesso:str|None, caminho_arquivo:str|None):
         if not (chave_acesso and caminho_arquivo):
             print(P(f'{chave_acesso=} ou {caminho_arquivo=} não pode estar vazio'))
-            Logs().register(status='Error', description=f'{chave_acesso=} ou {caminho_arquivo=} não pode estar vazio')
+            Logs().register(status='Report', description=f'{chave_acesso=} ou {caminho_arquivo=} não pode estar vazio')
             return False
         
         print(P(os.path.basename(caminho_arquivo)), end=" ")
@@ -163,7 +163,7 @@ class AnexarPDF(SAPManipulation):
         except Exception as error:
             print("error!")
             print(P((chave_acesso, str(error)),title='ERROR',color='red'))
-            Logs().register(status='Error', description=f"{chave_acesso=} - {str(error)}", exception=traceback.format_exc())
+            Logs().register(status='Report', description=f"{chave_acesso=} - {str(error)}", exception=traceback.format_exc())
             return False
         
         

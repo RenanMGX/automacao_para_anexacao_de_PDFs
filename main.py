@@ -39,8 +39,10 @@ def start_date(args):
         date = args
     else:
         raise Exception("Typo inconpativel!")
+    
     Execute.date = datetime.strptime(date, "%d.%m.%Y") #"02.09.2021"
     Execute.start()
+    
 
 if __name__ == "__main__":
     Arguments({

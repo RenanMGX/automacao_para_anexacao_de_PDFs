@@ -11,7 +11,7 @@ import traceback
 
 class SAPManipulation():
     @property
-    def ambiente(self) -> str:
+    def ambiente(self) -> str|None:
         return self.__ambiente
     
     @property
@@ -33,17 +33,18 @@ class SAPManipulation():
         return self.__using_active_conection
     
     def __init__(self, *, user:str|None="", password:str|None="", ambiente:str|None="", using_active_conection:bool=False) -> None:
-        if not ((user) and (password) and (ambiente)):
-            raise Exception(f"""é necessario preencher todos os campos \n
-                            {user=}\n
-                            {password=} \n 
-                            {ambiente=} \n                            
-                            """)
+        if not using_active_conection:
+            if not ((user) and (password) and (ambiente)):
+                raise Exception(f"""é necessario preencher todos os campos \n
+                                {user=}\n
+                                {password=} \n 
+                                {ambiente=} \n                            
+                                """)
         
         self.__using_active_conection = using_active_conection
-        self.__user:str = user
-        self.__password:str = password
-        self.__ambiente:str = ambiente
+        self.__user:str|None = user
+        self.__password:str|None = password
+        self.__ambiente:str|None = ambiente
          
     #decorador
     @staticmethod
