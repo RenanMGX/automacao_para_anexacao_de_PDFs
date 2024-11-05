@@ -66,7 +66,24 @@ class SAPManipulation():
             return result
                 #raise Exception("o sap precisa ser conectado primeiro!")
         return wrap
+
+    @staticmethod
+    def __verificar_conections(f):
+        @wraps(f)
+        def wrap(self, *args, **kwargs):
+            _self:SAPManipulation = self
+            
+            result = f(_self, *args, **kwargs)
+            try:
+                if "Continuar com este logon sem encerrar os logons existentes".lower() in (choice:=_self.session.findById("wnd[1]/usr/radMULTI_LOGON_OPT2")).text.lower():
+                    choice.select()
+                    _self.session.findById("wnd[0]").sendVKey(0)
+            except:
+                pass
+            return result
+        return wrap
     
+    @__verificar_conections
     def conectar_sap(self) -> None:
         self.__session: win32com.client.CDispatch
         if not self.using_active_conection:
