@@ -37,6 +37,8 @@ class AnexarPDF(SAPManipulation):
         
         self.session.findById("wnd[0]/usr/ctxtS_BUKRS-LOW").text = "*"
         
+        self.session.findById("wnd[0]/usr/ctxtP_VARI").text = "/SEIDOR"
+        
         self.session.findById("wnd[0]/tbar[1]/btn[8]").press()
         
         titl:str = self.session.findById("wnd[0]/titl").text
@@ -62,7 +64,9 @@ class AnexarPDF(SAPManipulation):
         
         downloads:list = []
         contador:int = 0
+        
         #import pdb; pdb.set_trace()
+        
         self.limpar_download_path() 
         while True:
             try:
