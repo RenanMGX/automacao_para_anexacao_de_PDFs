@@ -5,6 +5,7 @@ from Entities.dependencies.sap import SAPManipulation
 from Entities import exceptions
 import pygetwindow
 import pyautogui
+pyautogui.FAILSAFE = False
 from pygetwindow._pygetwindow_win import Win32Window
 import os
 import re
@@ -14,6 +15,8 @@ from typing import List, Dict
 import shutil
 from time import sleep
 from Entities.dependencies.functions import P
+import sys
+
 
 class AnexarPDF(SAPManipulation):
     download_path:str = os.path.join(os.getcwd(), 'downloads/pdf')
@@ -106,7 +109,7 @@ class AnexarPDF(SAPManipulation):
                         
             except Exception as error:
                 Logs().register(status='Error', description=str(error), exception=traceback.format_exc())
-                break
+                sys.exit()
             contador += 1
         
         #import pdb; pdb.set_trace()
