@@ -65,7 +65,7 @@ class AnexarPDF(SAPManipulation):
         downloads:list = []
         contador:int = 0
         
-        import pdb; pdb.set_trace()
+        #import pdb; pdb.set_trace()
         
         self.limpar_download_path() 
         while True:
