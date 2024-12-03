@@ -65,7 +65,7 @@ class AnexarPDF(SAPManipulation):
         downloads:list = []
         contador:int = 0
         
-        #import pdb; pdb.set_trace()
+        import pdb; pdb.set_trace()
         
         self.limpar_download_path() 
         while True:
@@ -105,6 +105,7 @@ class AnexarPDF(SAPManipulation):
                     Logs().register(status='Report', description="erro ao fazer download do pdf", exception=tbar)
                         
             except Exception as error:
+                Logs().register(status='Error', description=str(error), exception=traceback.format_exc())
                 break
             contador += 1
         

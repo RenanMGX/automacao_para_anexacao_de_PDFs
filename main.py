@@ -22,7 +22,8 @@ class Execute:
             for pdf in bot._listar_arquivos():
                 pdf:Dict[str,str]
                 bot.anexar_pdf_miro(chave_acesso=pdf.get('chave_de_acesso'), caminho_arquivo=pdf.get('endereço'))
-                
+            
+            Logs().register(status='Concluido', description=f"Trabalho concluido com sucesso")                
         except Entities.exceptions.NoDocuments:
             print(P("Execução concluida sem decumentos para esta data", color='cyan'))
             Logs().register(status='Concluido', description="Execução concluida sem decumentos para esta data")
@@ -42,6 +43,7 @@ def start_date(args):
     
     Execute.date = datetime.strptime(date, "%d.%m.%Y") #"02.09.2021"
     Execute.start()
+    Logs().register(status='Concluido', description=f"Trabalho com a data {date} concluido com sucesso")
     
 
 if __name__ == "__main__":
