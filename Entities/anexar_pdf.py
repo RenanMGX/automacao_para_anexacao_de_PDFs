@@ -108,8 +108,8 @@ class AnexarPDF(SAPManipulation):
                     Logs().register(status='Report', description="erro ao fazer download do pdf", exception=tbar)
                         
             except Exception as error:
-                Logs().register(status='Error', description=str(error), exception=traceback.format_exc())
-                sys.exit()
+                #Logs().register(status='Error', description=str(error), exception=traceback.format_exc())
+                break
             contador += 1
         
         #import pdb; pdb.set_trace()
