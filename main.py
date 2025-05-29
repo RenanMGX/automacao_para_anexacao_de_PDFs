@@ -18,10 +18,17 @@ class Execute:
             bot = AnexarPDF()
             
             bot.extrair_pdf_vtin_mde(date=Execute.date)
+            bot.fechar_sap()
             
             for pdf in bot._listar_arquivos():
                 pdf:Dict[str,str]
-                bot.anexar_pdf_miro(chave_acesso=pdf.get('chave_de_acesso'), caminho_arquivo=pdf.get('endereço'))
+                for _ in range(5):
+                    result = bot.anexar_pdf_miro(chave_acesso=pdf.get('chave_de_acesso'), caminho_arquivo=pdf.get('endereço'))
+                    bot.fechar_sap()
+                    if result:
+                        break
+                    
+                    
             
             Logs().register(status='Concluido', description=f"Trabalho concluido com sucesso")                
         except Entities.exceptions.NoDocuments:
@@ -39,7 +46,7 @@ def start_date(args):
     elif isinstance(args, str):
         date = args
     else:
-        raise Exception("Typo inconpativel!")
+        raise Exception("Tipo inconpativel!")
     
     Execute.date = datetime.strptime(date, "%d.%m.%Y") #"02.09.2021"
     Execute.start()
