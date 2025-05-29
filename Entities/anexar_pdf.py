@@ -26,7 +26,7 @@ class AnexarPDF(SAPManipulation):
     def __init__(self) -> None:
         credential_seleted = credential_seleted['crd'] if (credential_seleted:=Config()['credential']) else "None"
         crd:dict = Credential(credential_seleted).load()
-        super().__init__(user=crd.get('user'), password=crd.get('password'), ambiente=crd.get('ambiente'))
+        super().__init__(user=crd.get('user'), password=crd.get('password'), ambiente=crd.get('ambiente'))#, new_conection=True)
         
     
     @SAPManipulation.start_SAP    
@@ -34,6 +34,7 @@ class AnexarPDF(SAPManipulation):
         self.session.findById("wnd[0]/tbar[0]/okcd").text = "/n/VTIN/MDE"
         self.session.findById("wnd[0]").sendVKey(0)
         
+        #import pdb; pdb.set_trace()
         #02.09.2021
         self.session.findById("wnd[0]/usr/ctxtS_CREDAT-LOW").text = date.strftime('%d.%m.%Y')# <---------------------------
         self.session.findById("wnd[0]/usr/ctxtS_CREDAT-HIGH").text = date.strftime('%d.%m.%Y')#<---------------------------
@@ -48,7 +49,7 @@ class AnexarPDF(SAPManipulation):
         if (num_documento:=re.search(r'[\d+]+(?= documento\(s\) selecionado\(s\))', titl)):
             num_documento = int(num_documento.group())
         else:
-            raise exceptions.VerificQuantDocumentsError(f"não foi possivel identificar quandos documentos tem disponivel\n ")
+            raise exceptions.VerificQuantDocumentsError(f"não foi possivel identificar quantos documentos tem disponivel\n ")
 
         if num_documento <= 0:
             raise exceptions.NoDocuments("Sem documentos para anexar pdf")
@@ -112,13 +113,6 @@ class AnexarPDF(SAPManipulation):
                 break
             contador += 1
         
-        #import pdb; pdb.set_trace()
-        # self.limpar_download_path() 
-        # for download in downloads:
-            # shutil.move(download, self.download_path)
-            #os.unlink(download)
-
-        #re.search(r'(?<=NFe)[\d]+(?=.pdf)', msg.group())
     
     @SAPManipulation.start_SAP            
     def anexar_pdf_miro(self, *, chave_acesso:str|None, caminho_arquivo:str|None):
@@ -165,6 +159,7 @@ class AnexarPDF(SAPManipulation):
             
             self.session.findById("wnd[0]/shellcont").close()
             
+            Logs().register(status='Report', description=f"documento '{os.path.basename(caminho_arquivo)}' foi anexado!")
             print("finalizado!")
         
             return True
@@ -172,7 +167,7 @@ class AnexarPDF(SAPManipulation):
             print("error!")
             print(P((chave_acesso, str(error)),title='ERROR',color='red'))
             Logs().register(status='Report', description=f"{chave_acesso=} - {str(error)}", exception=traceback.format_exc())
-            return False
+        return False
         
         
     @staticmethod
