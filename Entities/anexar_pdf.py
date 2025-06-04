@@ -77,24 +77,39 @@ class AnexarPDF(SAPManipulation):
                 self.session.findById("wnd[0]/usr/shell/shellcont[0]/shell").currentCellRow = contador
                 self.session.findById("wnd[0]/usr/shell/shellcont[0]/shell").selectedRows = str(contador)
                 
+                sleep(2)
                 janela:Win32Window = self.get_window("Monitor DF-e Estaduais")
+                sleep(.2)
                 janela.minimize()
+                sleep(.2)
                 janela.restore()
+                sleep(.2)
                 janela.moveTo(0,0)
+                sleep(.2)
                 pyautogui.hotkey('ctrl' , 'f2')
+                sleep(.2)
                 janela.minimize()
+                sleep(.2)
                 while True:
                     #print(P('esperando a tela Procurar Arquivos ou Pastas'))
                     if 'Procurar Arquivos ou Pastas' in pygetwindow.getAllTitles():
+                        sleep(.2)
                         janela_procurar = self.get_window('Procurar Arquivos ou Pastas')
+                        sleep(.2)
                         janela.minimize()
+                        sleep(.2)
                         janela_procurar.minimize()
+                        sleep(.2)
                         janela_procurar.restore()
+                        sleep(.2)
                         janela_procurar.moveTo(0,0)
+                        sleep(.2)
                         janela_procurar.resize(300,300)
+                        sleep(.2)
                         pyautogui.press('enter')
+                        sleep(.2)
                         break
-                    sleep(1)
+                    sleep(3)
                 janela.restore()
                 tbar:str = self.session.findById("wnd[0]/sbar").text
                 if 'Download:' in tbar:
@@ -112,6 +127,7 @@ class AnexarPDF(SAPManipulation):
                 #Logs().register(status='Error', description=str(error), exception=traceback.format_exc())
                 break
             contador += 1
+            sleep(3)
         
     
     @SAPManipulation.start_SAP            
