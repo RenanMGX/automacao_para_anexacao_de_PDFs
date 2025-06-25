@@ -1,7 +1,6 @@
 from datetime import datetime
-from Entities.dependencies.config import Config
-from Entities.dependencies.credenciais import Credential
-from Entities.dependencies.sap import SAPManipulation
+from dateutil.relativedelta import relativedelta
+from patrimar_dependencies.sap import SAPManipulation
 from Entities import exceptions
 import pygetwindow
 import pyautogui
@@ -9,13 +8,15 @@ pyautogui.FAILSAFE = False
 from pygetwindow._pygetwindow_win import Win32Window
 import os
 import re
-from Entities.dependencies.logs import Logs
 import traceback
 from typing import List, Dict
 import shutil
 from time import sleep
-from Entities.dependencies.functions import P
+from patrimar_dependencies.functions import P
 import sys
+from . import utils
+from botcity.maestro import * #type:ignore
+from . import utils
 
 
 class AnexarPDF(SAPManipulation):
@@ -23,20 +24,18 @@ class AnexarPDF(SAPManipulation):
     if not os.path.exists(download_path):
         os.makedirs(download_path)
     
-    def __init__(self) -> None:
-        credential_seleted = credential_seleted['crd'] if (credential_seleted:=Config()['credential']) else "None"
-        crd:dict = Credential(credential_seleted).load()
-        super().__init__(user=crd.get('user'), password=crd.get('password'), ambiente=crd.get('ambiente'))#, new_conection=True)
+    def __init__(self, user:str, password:str, ambiente:str, maestro:BotMaestroSDK|None = None) -> None:
+        self.__maestro:BotMaestroSDK|None = maestro
+        
+        super().__init__(user=user, password=password, ambiente=ambiente, new_conection=True)
         
     
     @SAPManipulation.start_SAP    
-    def extrair_pdf_vtin_mde(self, *, date:datetime, fechar_sap_no_final:bool=False):
+    def extrair_pdf_vtin_mde(self, *, date:datetime, range_dias:int=0, fechar_sap_no_final:bool=False):
         self.session.findById("wnd[0]/tbar[0]/okcd").text = "/n/VTIN/MDE"
         self.session.findById("wnd[0]").sendVKey(0)
         
-        #import pdb; pdb.set_trace()
-        #02.09.2021
-        self.session.findById("wnd[0]/usr/ctxtS_CREDAT-LOW").text = date.strftime('%d.%m.%Y')# <---------------------------
+        self.session.findById("wnd[0]/usr/ctxtS_CREDAT-LOW").text = (date - relativedelta(days=int(range_dias))).strftime('%d.%m.%Y')# <---------------------------
         self.session.findById("wnd[0]/usr/ctxtS_CREDAT-HIGH").text = date.strftime('%d.%m.%Y')#<---------------------------
         
         self.session.findById("wnd[0]/usr/ctxtS_BUKRS-LOW").text = "*"
@@ -74,56 +73,70 @@ class AnexarPDF(SAPManipulation):
         self.limpar_download_path() 
         while True:
             try:
-                self.session.findById("wnd[0]/usr/shell/shellcont[0]/shell").currentCellRow = contador
-                self.session.findById("wnd[0]/usr/shell/shellcont[0]/shell").selectedRows = str(contador)
                 
-                sleep(2)
-                janela:Win32Window = self.get_window("Monitor DF-e Estaduais")
-                sleep(.2)
-                janela.minimize()
-                sleep(.2)
-                janela.restore()
-                sleep(.2)
-                janela.moveTo(0,0)
-                sleep(.2)
-                pyautogui.hotkey('ctrl' , 'f2')
-                sleep(.2)
-                janela.minimize()
-                sleep(.2)
-                while True:
-                    #print(P('esperando a tela Procurar Arquivos ou Pastas'))
-                    if 'Procurar Arquivos ou Pastas' in pygetwindow.getAllTitles():
-                        sleep(.2)
-                        janela_procurar = self.get_window('Procurar Arquivos ou Pastas')
-                        sleep(.2)
-                        janela.minimize()
-                        sleep(.2)
-                        janela_procurar.minimize()
-                        sleep(.2)
-                        janela_procurar.restore()
-                        sleep(.2)
-                        janela_procurar.moveTo(0,0)
-                        sleep(.2)
-                        janela_procurar.resize(300,300)
-                        sleep(.2)
-                        pyautogui.press('enter')
-                        sleep(.2)
+                for t in range(5):
+                    self.session.findById("wnd[0]/usr/shell/shellcont[0]/shell").currentCellRow = contador
+                    self.session.findById("wnd[0]/usr/shell/shellcont[0]/shell").selectedRows = str(contador)
+                    
+                    chave_acesso = self.session.findById("wnd[0]/usr/shell/shellcont[0]/shell").GetCellValue(contador, "ID")
+                    
+                    print(chave_acesso, utils.RegistroNFe().exists(chave_acesso))
+                    if utils.RegistroNFe().exists(chave_acesso):
                         break
-                    sleep(3)
-                janela.restore()
-                tbar:str = self.session.findById("wnd[0]/sbar").text
-                if 'Download:' in tbar:
-                    if (msg:=re.search(r'C:\\[\d\D]+', tbar)):
-                        #downloads.append(msg.group())
-                        shutil.move(msg.group(), self.download_path)
-                    else:
-                        print(f"não foi possivel baixar o pdf - {msg}")
-                        Logs().register(status='Report', description="erro ao fazer download do pdf", exception=msg)
-                else:
-                    print(f"não foi possivel baixar o pd - {tbar}")
-                    Logs().register(status='Report', description="erro ao fazer download do pdf", exception=tbar)
+                        
+                    sleep(2)
+                    janela:Win32Window = self.get_window("Monitor DF-e Estaduais")
+                    sleep(.2)
+                    janela.minimize()
+                    sleep(.2)
+                    janela.restore()
+                    sleep(.2)
+                    janela.moveTo(0,0)
+                    sleep(.2)
+                    pyautogui.hotkey('ctrl' , 'f2')
+                    sleep(.2)
+                    janela.minimize()
+                    sleep(.2)
+                    
+                    if utils.click_butto_per_windows(
+                            window_name="Procurar Arquivos ou Pastas",
+                            button_name="OK",
+                            raise_exception=False
+                        ):
+                        
+                        tbar:str = self.session.findById("wnd[0]/sbar").text
+                        if 'Download:' in tbar:
+                            if (msg:=re.search(r'C:\\[\d\D]+', tbar)):
+                                #downloads.append(msg.group())
+                                shutil.move(msg.group(), self.download_path)
+                            else:
+                                print(f"não foi possivel baixar o pdf - {msg}")
+                                if not self.__maestro is None:
+                                    self.__maestro.alert(
+                                        task_id=self.__maestro.get_execution().task_id,
+                                        title="erro ao fazer download do pdf",
+                                        message=str(msg),
+                                        alert_type=AlertType.INFO
+                                    )                                    
+                                    
+                        else:
+                            print(f"não foi possivel baixar o pd - {tbar}")
+                            
+                            if not self.__maestro is None:
+                                self.__maestro.alert(
+                                    task_id=self.__maestro.get_execution().task_id,
+                                    title="erro ao fazer download do pdf",
+                                    message=str(tbar),
+                                    alert_type=AlertType.INFO
+                                )                                    
+                            
+                        break     
+                    if t >= 4:
+                        break         
                         
             except Exception as error:
+                #import traceback
+                #print(traceback.format_exc())
                 #Logs().register(status='Error', description=str(error), exception=traceback.format_exc())
                 break
             contador += 1
@@ -134,7 +147,15 @@ class AnexarPDF(SAPManipulation):
     def anexar_pdf_miro(self, *, chave_acesso:str|None, caminho_arquivo:str|None):
         if not (chave_acesso and caminho_arquivo):
             print(P(f'{chave_acesso=} ou {caminho_arquivo=} não pode estar vazio'))
-            Logs().register(status='Report', description=f'{chave_acesso=} ou {caminho_arquivo=} não pode estar vazio')
+            
+            if not self.__maestro is None:
+                self.__maestro.alert(
+                    task_id=self.__maestro.get_execution().task_id,
+                    title="erro dentro do AnexarPDF.anxar_pdf_miro()",
+                    message=f'{chave_acesso=} ou {caminho_arquivo=} não pode estar vazio',
+                    alert_type=AlertType.INFO
+                )                                    
+            
             return False
         
         print(P(os.path.basename(caminho_arquivo)), end=" ")
@@ -175,14 +196,29 @@ class AnexarPDF(SAPManipulation):
             
             self.session.findById("wnd[0]/shellcont").close()
             
-            Logs().register(status='Report', description=f"documento '{os.path.basename(caminho_arquivo)}' foi anexado!")
+            if not self.__maestro is None:
+                self.__maestro.alert(
+                    task_id=self.__maestro.get_execution().task_id,
+                    title="erro dentro do AnexarPDF.anxar_pdf_miro()",
+                    message=f"documento '{os.path.basename(caminho_arquivo)}' foi anexado!",
+                    alert_type=AlertType.INFO
+                )                                    
+            
             print("finalizado!")
         
             return True
         except Exception as error:
             print("error!")
             print(P((chave_acesso, str(error)),title='ERROR',color='red'))
-            Logs().register(status='Report', description=f"{chave_acesso=} - {str(error)}", exception=traceback.format_exc())
+            
+            if not self.__maestro is None:
+                self.__maestro.alert(
+                    task_id=self.__maestro.get_execution().task_id,
+                    title=f"erro com a {chave_acesso=}",
+                    message=str(error),
+                    alert_type=AlertType.INFO
+                )                                    
+            
         return False
         
         
@@ -214,7 +250,15 @@ class AnexarPDF(SAPManipulation):
                 })
             else:
                 print(P(f"não foi possivel extrair a cheve de acesso do caminho '{file}'", title='REPORT', color='red'))
-                Logs().register(status='Report', description=f"não foi possivel extrair a cheve de acesso do caminho '{file}'")
+                
+                if not self.__maestro is None:
+                    self.__maestro.alert(
+                        task_id=self.__maestro.get_execution().task_id,
+                        title=f"erro dentro do AnexarPDF._listar_arquivos()",
+                        message=f"não foi possivel extrair a cheve de acesso do caminho '{file}'",
+                        alert_type=AlertType.INFO
+                    )                                    
+                
         return lista
                 
 if __name__ == "__main__":
