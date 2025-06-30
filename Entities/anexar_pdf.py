@@ -105,6 +105,7 @@ class AnexarPDF(SAPManipulation):
                         ):
                         
                         tbar:str = self.session.findById("wnd[0]/sbar").text
+                        sleep(2)
                         if 'Download:' in tbar:
                             if (msg:=re.search(r'C:\\[\d\D]+', tbar)):
                                 #downloads.append(msg.group())
@@ -196,14 +197,14 @@ class AnexarPDF(SAPManipulation):
             
             self.session.findById("wnd[0]/shellcont").close()
             
-            if not self.__maestro is None:
-                self.__maestro.alert(
-                    task_id=self.__maestro.get_execution().task_id,
-                    title="erro dentro do AnexarPDF.anxar_pdf_miro()",
-                    message=f"documento '{os.path.basename(caminho_arquivo)}' foi anexado!",
-                    alert_type=AlertType.INFO
-                )                                    
-            
+            if not self.__maestro is None:                
+                self.__maestro.new_log_entry(
+                    activity_label="SAP-anexar_pdf_MIRO",
+                    values={
+                        "texto": f"documento '{os.path.basename(caminho_arquivo)}' foi anexado!"
+                    }
+                )            
+                
             print("finalizado!")
         
             return True

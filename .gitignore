@@ -6,6 +6,7 @@
 *Logs
 *downloads
 *json
+*.zip
 
 
 # Created by https://www.toptal.com/developers/gitignore/api/python,venv,visualstudiocode
