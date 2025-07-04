@@ -73,6 +73,8 @@ class AnexarPDF(SAPManipulation):
         self.limpar_download_path() 
         while True:
             try:
+                self.session.findById("wnd[0]/usr/shell/shellcont[0]/shell").pressToolbarButton("&MB_VARIANT")
+                self.session.findById("wnd[1]").close()
                 
                 for t in range(5):
                     self.session.findById("wnd[0]/usr/shell/shellcont[0]/shell").currentCellRow = contador
